@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.edge-hermes-copilot.bridge</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/ljg/Develop/Projects/edge-hermes-copilot/bridge/server.js</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/ljg/Develop/Projects/edge-hermes-copilot</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/ljg/.local/bin</string>
+    <key>HERMES_BRIDGE_HOST</key>
+    <string>127.0.0.1</string>
+    <key>HERMES_BRIDGE_PORT</key>
+    <string>18765</string>
+    <key>HERMES_ACCEPT_HOOKS</key>
+    <string>1</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/ljg/Library/Logs/edge-hermes-copilot/bridge.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/ljg/Library/Logs/edge-hermes-copilot/bridge.err.log</string>
+</dict>
+</plist>

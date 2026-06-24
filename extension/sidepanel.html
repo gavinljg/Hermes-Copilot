@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hermes</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p id="pageMeta">读取当前标签页</p>
+        </div>
+        <div class="topActions">
+          <button id="newSession" title="清空当前会话">新会话</button>
+        </div>
+      </header>
+
+      <section id="bridgeOnboarding" class="onboarding" hidden>
+        <div>
+          <h2>未连接 Hermes Bridge</h2>
+          <p>安装本地 bridge 后，扩展会连接你自己的 Hermes 配置来调用模型。</p>
+        </div>
+        <pre id="installCommand"></pre>
+        <div class="onboardingActions">
+          <button type="button" id="copyInstallCommand">复制命令</button>
+          <button type="button" id="checkBridge">重新检测</button>
+        </div>
+        <p class="onboardingNote">运行脚本前可先打开 GitHub 仓库查看源码。页面内容会发送给本机 Hermes，再由你的 Hermes 配置调用模型。</p>
+      </section>
+
+      <section id="messages" class="messages" aria-live="polite"></section>
+
+      <form id="askForm" class="composer">
+        <textarea id="question" rows="4" placeholder="基于当前页面提问，或直接让 Hermes 总结。"></textarea>
+        <div class="composerRow">
+          <button type="button" id="summarize">总结页面</button>
+          <button type="submit" id="send">发送</button>
+        </div>
+      </form>
+
+      <details class="settings historyPanel">
+        <summary>会话历史</summary>
+        <div class="settingsBody">
+          <label>
+            历史会话
+            <select id="sessionSelect"></select>
+          </label>
+          <div class="historyActions">
+            <button type="button" id="restoreSession">恢复</button>
+            <button type="button" id="deleteSession">删除</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="settings">
+        <summary>高级设置</summary>
+        <div class="settingsBody">
+          <label>
+            模型
+            <select id="modelSelect">
+              <option value="deepseek|deepseek-v4-flash">DeepSeek V4 Flash</option>
+              <option value="deepseek|deepseek-v4-pro">DeepSeek V4 Pro</option>
+              <option value="|">Hermes 默认</option>
+            </select>
+          </label>
+          <label>
+            Bridge
+            <input id="bridgeUrl" type="url" spellcheck="false" />
+          </label>
+          <label>
+            Token
+            <input id="bridgeToken" type="password" spellcheck="false" placeholder="可选" />
+          </label>
+        </div>
+      </details>
+    </main>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

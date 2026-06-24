@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hermes Copilot Setup</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --text: #172033;
+        --muted: #5f6b7a;
+        --border: #d9e0ea;
+        --accent: #1267d8;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f141b;
+          --panel: #171d25;
+          --text: #eef3fb;
+          --muted: #a7b0bf;
+          --border: #303947;
+        }
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+      }
+      main {
+        margin: 0 auto;
+        max-width: 880px;
+        padding: 40px 20px;
+      }
+      header {
+        margin-bottom: 28px;
+      }
+      h1 {
+        font-size: clamp(32px, 5vw, 48px);
+        line-height: 1.05;
+        margin: 0 0 12px;
+      }
+      p {
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin: 16px 0;
+        padding: 20px;
+      }
+      h2 {
+        font-size: 20px;
+        margin: 0 0 10px;
+      }
+      pre {
+        background: color-mix(in srgb, var(--border) 30%, transparent);
+        border-radius: 8px;
+        overflow-x: auto;
+        padding: 14px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      li {
+        line-height: 1.7;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Hermes Copilot</h1>
+        <p>一个连接 Microsoft Edge 当前页面与本机 Hermes 的浏览器侧边栏助手。</p>
+      </header>
+
+      <section>
+        <h2>安装 Bridge</h2>
+        <p>Bridge 会在你的电脑上运行，只连接本机 Hermes。运行前可以先查看脚本源码。</p>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/gavinljg/Hermes-Copilot/main/install.sh | bash</code></pre>
+      </section>
+
+      <section>
+        <h2>加载扩展</h2>
+        <ol>
+          <li>打开 <code>edge://extensions/</code></li>
+          <li>启用 Developer mode</li>
+          <li>选择 Load unpacked</li>
+          <li>选择 <code>~/.local/share/hermes-copilot/extension</code></li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>数据说明</h2>
+        <p>扩展会读取当前标签页的标题、URL、可见正文、选中文本、表单摘要和资源请求摘要，然后发送给本机 Bridge。Bridge 调用你本机 Hermes 的模型配置。项目本身不提供云端服务，也不保存你的页面内容。</p>
+      </section>
+    </main>
+  </body>
+</html>
