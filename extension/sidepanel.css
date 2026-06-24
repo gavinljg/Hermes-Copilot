@@ -91,6 +91,18 @@ button:hover {
   border-color: var(--accent);
 }
 
+.iconButton {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  font-weight: 700;
+  height: 32px;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0;
+  width: 32px;
+}
+
 button.primary,
 #send {
   background: var(--accent);

@@ -58,16 +58,9 @@
         gap: 14px;
       }
 
-      .logo {
-        align-items: center;
-        background: linear-gradient(135deg, #1373d1, #69b7ff);
+      .brand img {
         border-radius: 14px;
-        color: white;
-        display: flex;
-        font-size: 32px;
-        font-weight: 800;
         height: 64px;
-        justify-content: center;
         width: 64px;
       }
 
@@ -199,7 +192,7 @@
     <main>
       <header class="hero">
         <div class="brand">
-          <div class="logo" aria-hidden="true">H</div>
+          <img src="icons/icon128.png" alt="" />
           <h1>Hermes Copilot</h1>
         </div>
         <p class="lead">把浏览器当前页面交给你本机的 Hermes 来理解、总结和追问。扩展只负责读取页面与展示对话，模型调用仍走你自己的 Hermes 配置。</p>
@@ -258,20 +251,6 @@
         <a class="button" href="https://github.com/gavinljg/Hermes-Copilot" target="_blank" rel="noreferrer">查看 GitHub 仓库</a>
       </section>
     </main>
-    <script>
-      const command = document.querySelector("#installCommand").textContent;
-      const button = document.querySelector("#copyInstall");
-      const status = document.querySelector("#copyStatus");
-
-      button.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(command);
-        status.textContent = "已复制安装命令。";
-        button.textContent = "已复制";
-        setTimeout(() => {
-          status.textContent = "";
-          button.textContent = "复制";
-        }, 1600);
-      });
-    </script>
+    <script src="help.js"></script>
   </body>
 </html>

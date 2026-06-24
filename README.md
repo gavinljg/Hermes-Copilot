@@ -1,6 +1,6 @@
 # Hermes Copilot
 
-Hermes Copilot is a Microsoft Edge side-panel extension that reads the current page context and sends it to a local Hermes Bridge. The bridge calls the user's own Hermes setup, so model/provider configuration stays local.
+Hermes Copilot is a browser side-panel extension that reads the current page context and sends it to a local Hermes Bridge. The bridge calls the user's own Hermes setup, so model/provider configuration stays local.
 
 ## What It Does
 

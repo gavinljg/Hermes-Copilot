@@ -12,6 +12,7 @@ const els = {
   summarize: document.querySelector("#summarize"),
   send: document.querySelector("#send"),
   newSession: document.querySelector("#newSession"),
+  helpButton: document.querySelector("#helpButton"),
   bridgeOnboarding: document.querySelector("#bridgeOnboarding"),
   installCommand: document.querySelector("#installCommand"),
   copyInstallCommand: document.querySelector("#copyInstallCommand"),
@@ -47,6 +48,7 @@ async function init() {
   els.bridgeToken.addEventListener("change", saveSettings);
   els.modelSelect.addEventListener("change", saveSettings);
   els.newSession.addEventListener("click", newSession);
+  els.helpButton.addEventListener("click", openHelp);
   els.copyInstallCommand.addEventListener("click", copyInstallCommand);
   els.checkBridge.addEventListener("click", checkBridge);
   els.restoreSession.addEventListener("click", restoreSelectedSession);
@@ -61,6 +63,10 @@ async function init() {
   await loadSessions();
   renderSessionOptions();
   await checkBridge();
+}
+
+async function openHelp() {
+  await chrome.tabs.create({ url: chrome.runtime.getURL("help.html") });
 }
 
 async function saveSettings() {
