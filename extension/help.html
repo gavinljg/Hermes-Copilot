@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hermes Copilot 使用指引</title>
+    <title>Hermes Copilot Guide</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -83,6 +83,29 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+      }
+
+      .languageSwitcher {
+        background: color-mix(in srgb, var(--panel) 76%, transparent);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        width: fit-content;
+      }
+
+      .languageChoice {
+        background: transparent;
+        border-color: transparent;
+        color: var(--muted);
+        min-height: 34px;
+      }
+
+      .languageChoice.isActive {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
       }
 
       .pill {
@@ -186,6 +209,10 @@
         font-size: 13px;
         min-height: 20px;
       }
+
+      [hidden] {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
@@ -195,8 +222,19 @@
           <img src="icons/icon128.png" alt="" />
           <h1>Hermes Copilot</h1>
         </div>
-        <p class="lead">把浏览器当前页面交给你本机的 Hermes 来理解、总结和追问。扩展只负责读取页面与展示对话，模型调用仍走你自己的 Hermes 配置。</p>
-        <div class="quick" aria-label="关键特性">
+        <div class="languageSwitcher" role="tablist" aria-label="Language">
+          <button class="languageChoice isActive" type="button" data-language="en" role="tab" aria-selected="true">English</button>
+          <button class="languageChoice" type="button" data-language="zh" role="tab" aria-selected="false">中文</button>
+        </div>
+        <p class="lead localized" data-language-panel="en">Use the current browser page with your local Hermes setup for summaries, follow-up questions, and page-aware assistance. The extension reads and displays context; model calls still go through your own Hermes configuration.</p>
+        <p class="lead localized" data-language-panel="zh" hidden>把浏览器当前页面交给你本机的 Hermes 来理解、总结和追问。扩展只负责读取页面与展示对话，模型调用仍走你自己的 Hermes 配置。</p>
+        <div class="quick localized" data-language-panel="en" aria-label="Key features">
+          <span class="pill">Local Bridge</span>
+          <span class="pill">Current tab context</span>
+          <span class="pill">Chat history</span>
+          <span class="pill">Model selection</span>
+        </div>
+        <div class="quick localized" data-language-panel="zh" aria-label="关键特性" hidden>
           <span class="pill">本机 Bridge</span>
           <span class="pill">读取当前标签页</span>
           <span class="pill">会话历史</span>
@@ -204,15 +242,62 @@
         </div>
       </header>
 
-      <div class="grid">
+      <div class="grid localized" data-language-panel="en">
+        <section>
+          <h2>1. Install the local Bridge</h2>
+          <p>The Bridge runs on your computer, listens on <code>127.0.0.1:18765</code> by default, and forwards extension requests to Hermes.</p>
+          <div class="command">
+            <code class="installCommand">curl -fsSL https://raw.githubusercontent.com/gavinljg/Hermes-Copilot/main/install.sh | bash</code>
+            <button class="copyInstall" type="button">Copy</button>
+          </div>
+          <p class="copyStatus status" aria-live="polite"></p>
+        </section>
+
+        <section>
+          <h2>2. Load the extension</h2>
+          <ol>
+            <li>Open <code>edge://extensions/</code>.</li>
+            <li>Turn on Developer mode.</li>
+            <li>Click Load unpacked.</li>
+            <li>Select <code>~/.local/share/hermes-copilot/extension</code>.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2>3. Start using it</h2>
+          <ul>
+            <li>Open any web page and click the extension icon to open the side panel.</li>
+            <li>Click “Summarize page”, or type your own question.</li>
+            <li>Open “Advanced Settings” when you need to switch models.</li>
+            <li>Open “Chat History” to restore previous conversations.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Common fixes</h2>
+          <ul>
+            <li>If the Bridge is not connected, run the install command and click Recheck.</li>
+            <li>If a site cannot be read, make sure the extension is allowed to access that site.</li>
+            <li>Browser internal pages usually cannot expose body text; only title and URL may be available.</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="full localized" data-language-panel="en">
+        <h2>Where your data goes</h2>
+        <p>The extension reads the current tab title, URL, visible text, selected text, form summaries, and resource summaries, then sends them to the local Bridge. The Bridge calls your Hermes configuration; if Hermes is configured with a cloud model provider, that provider may receive the page content.</p>
+        <a class="button" href="https://github.com/gavinljg/Hermes-Copilot" target="_blank" rel="noreferrer">View GitHub repository</a>
+      </section>
+
+      <div class="grid localized" data-language-panel="zh" hidden>
         <section>
           <h2>1. 安装本地 Bridge</h2>
           <p>Bridge 运行在你的电脑上，默认监听 <code>127.0.0.1:18765</code>，负责把扩展请求转给 Hermes。</p>
           <div class="command">
-            <code id="installCommand">curl -fsSL https://raw.githubusercontent.com/gavinljg/Hermes-Copilot/main/install.sh | bash</code>
-            <button id="copyInstall" type="button">复制</button>
+            <code class="installCommand">curl -fsSL https://raw.githubusercontent.com/gavinljg/Hermes-Copilot/main/install.sh | bash</code>
+            <button class="copyInstall" type="button">复制</button>
           </div>
-          <p id="copyStatus" class="status" aria-live="polite"></p>
+          <p class="copyStatus status" aria-live="polite"></p>
         </section>
 
         <section>
@@ -245,7 +330,7 @@
         </section>
       </div>
 
-      <section class="full">
+      <section class="full localized" data-language-panel="zh" hidden>
         <h2>数据会去哪里</h2>
         <p>扩展会读取当前标签页的标题、URL、可见正文、选中文本、表单摘要和资源请求摘要，并发送给本机 Bridge。Bridge 再调用你的 Hermes 配置；如果 Hermes 配置了云端模型提供商，该提供商可能会收到这些页面内容。</p>
         <a class="button" href="https://github.com/gavinljg/Hermes-Copilot" target="_blank" rel="noreferrer">查看 GitHub 仓库</a>

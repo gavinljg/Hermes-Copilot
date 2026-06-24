@@ -8,6 +8,7 @@ Hermes Copilot is a browser side-panel extension that reads the current page con
 - Sends that context to a local bridge at `127.0.0.1:18765`.
 - The bridge invokes `hermes -z` with the selected provider/model.
 - Supports Markdown rendering, visible analysis-summary bubbles, streaming-style incremental display, local session history, and model selection.
+- Defaults to English for public users, with a Chinese language tab available in the extension and guide pages.
 
 ## Install
 

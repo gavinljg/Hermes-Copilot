@@ -52,7 +52,8 @@ function truncate(text, max) {
 }
 
 function buildPrompt(payload) {
-  const question = truncate(payload.question || "请总结当前页面。", 6000);
+  const language = payload.language === "zh" ? "zh" : "en";
+  const question = truncate(payload.question || (language === "zh" ? "请总结当前页面。" : "Summarize the current page."), 6000);
   const page = payload.page || {};
   const resources = Array.isArray(page.resources) ? page.resources.slice(0, 80) : [];
   const forms = Array.isArray(page.forms) ? page.forms.slice(0, 30) : [];
@@ -68,20 +69,30 @@ function buildPrompt(payload) {
   };
 
   return [
-    "你是一个运行在用户本机 Edge 侧边栏里的网页助手。",
-    "请基于用户提供的当前页面上下文回答问题。优先使用页面上下文；如果上下文不足，请明确说明缺什么。",
-    "如果用户问接口/网络调试，只能使用 resources 里可见的 Resource Timing URL/类型/耗时等信息；不要假装看到了 response body、request body 或完整 headers。",
-    "回复格式要求：每次回答开头必须先输出一个简短的“分析思路：”段落。这里不是隐藏推理，只写 2-4 条面向用户的简洁判断依据。然后空一行，再输出“正式答案：”和正式内容。",
-    "回答默认使用中文，除非用户明确要求其他语言。保持直接、可操作。",
+    language === "zh"
+      ? "你是一个运行在用户本机浏览器侧边栏里的网页助手。"
+      : "You are a browser side-panel assistant running on the user's own machine.",
+    language === "zh"
+      ? "请基于用户提供的当前页面上下文回答问题。优先使用页面上下文；如果上下文不足，请明确说明缺什么。"
+      : "Answer using the current page context provided by the user. Prefer page context; if it is insufficient, clearly say what is missing.",
+    language === "zh"
+      ? "如果用户问接口/网络调试，只能使用 resources 里可见的 Resource Timing URL/类型/耗时等信息；不要假装看到了 response body、request body 或完整 headers。"
+      : "For API or network debugging questions, only use visible Resource Timing data in resources such as URL, type, and duration. Do not pretend to see response bodies, request bodies, or full headers.",
+    language === "zh"
+      ? "回复格式要求：每次回答开头必须先输出一个简短的“分析思路：”段落。这里不是隐藏推理，只写 2-4 条面向用户的简洁判断依据。然后空一行，再输出“正式答案：”和正式内容。"
+      : "Response format: start every answer with a short “Analysis:” section. This is not hidden chain-of-thought; write only 2-4 concise user-facing reasons or evidence points. Then add a blank line and output “Final answer:” followed by the answer.",
+    language === "zh"
+      ? "回答默认使用中文，除非用户明确要求其他语言。保持直接、可操作。"
+      : "Default to English unless the user explicitly asks for another language. Keep the answer direct and actionable.",
     "",
-    history.length ? `当前会话最近消息：\n${JSON.stringify(history.map((item) => ({
+    history.length ? `${language === "zh" ? "当前会话最近消息" : "Recent messages in this chat"}:\n${JSON.stringify(history.map((item) => ({
       role: item.role === "assistant" ? "assistant" : "user",
       content: truncate(item.content, 6000)
-    })), null, 2)}` : "当前会话最近消息：[]",
+    })), null, 2)}` : `${language === "zh" ? "当前会话最近消息" : "Recent messages in this chat"}: []`,
     "",
-    `用户问题：\n${question}`,
+    `${language === "zh" ? "用户问题" : "User question"}:\n${question}`,
     "",
-    `页面上下文 JSON：\n${JSON.stringify(context, null, 2)}`
+    `${language === "zh" ? "页面上下文 JSON" : "Page context JSON"}:\n${JSON.stringify(context, null, 2)}`
   ].join("\n");
 }
 
@@ -261,5 +272,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Edge Hermes bridge listening on http://${HOST}:${PORT}`);
+  console.log(`Hermes Copilot bridge listening on http://${HOST}:${PORT}`);
 });

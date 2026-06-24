@@ -56,7 +56,13 @@ body {
   justify-content: space-between;
 }
 
+.topbar > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .topActions {
+  align-items: center;
   display: flex;
   flex: 0 0 auto;
   gap: 8px;
@@ -70,7 +76,7 @@ p {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.35;
-  max-width: 240px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,6 +95,27 @@ button {
 
 button:hover {
   border-color: var(--accent);
+}
+
+.languageTabs {
+  background: color-mix(in srgb, var(--border) 26%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  display: flex;
+  padding: 2px;
+}
+
+.languageTab {
+  border: 0;
+  border-radius: 5px;
+  font-size: 12px;
+  min-height: 28px;
+  padding: 4px 7px;
+}
+
+.languageTab.isActive {
+  background: var(--accent);
+  color: var(--accent-text);
 }
 
 .iconButton {

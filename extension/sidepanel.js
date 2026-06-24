@@ -3,6 +3,86 @@ const DEFAULT_INSTALL_COMMAND = "curl -fsSL https://raw.githubusercontent.com/ga
 const SESSION_STORE_KEY = "edgeHermesSessions";
 const MAX_SESSIONS = 20;
 const MAX_MESSAGES_PER_SESSION = 40;
+const I18N = {
+  en: {
+    pageMetaIdle: "Reading current tab",
+    openGuide: "Open guide",
+    newSession: "New Chat",
+    newSessionTitle: "Clear current chat",
+    bridgeDisconnected: "Hermes Bridge is not connected",
+    bridgeIntro: "Install the local bridge so the extension can use your own Hermes setup to call models.",
+    copyCommand: "Copy command",
+    copied: "Copied",
+    recheck: "Recheck",
+    bridgeNote: "You can review the GitHub source before running the script. Page content is sent to the local Hermes Bridge, then handled by your Hermes model configuration.",
+    questionPlaceholder: "Ask about the current page, or let Hermes summarize it.",
+    summarize: "Summarize page",
+    summarizePrompt: "Summarize the current page and list the points I should most likely pay attention to.",
+    defaultPrompt: "Summarize the current page.",
+    send: "Send",
+    processing: "Working",
+    history: "Chat History",
+    historySessions: "Saved chats",
+    noHistory: "No saved chats",
+    unnamedSession: "Untitled chat",
+    restoredSession: "Restored chat",
+    restore: "Restore",
+    delete: "Delete",
+    advanced: "Advanced Settings",
+    model: "Model",
+    hermesDefault: "Hermes Default",
+    optional: "Optional",
+    internalPage: "This may be a browser internal page. The extension can only use the title and URL.",
+    internalPageMeta: "Browser internal page",
+    noActiveTab: "No active tab found",
+    readFailed: "Failed to read page",
+    pageContextFailed: "Page context read failed",
+    requestFailed: "Request failed",
+    waiting: "Waiting for Hermes...",
+    emptyResponse: "(empty response)",
+    thinkingLabel: "Analysis",
+    currentLanguageName: "English"
+  },
+  zh: {
+    pageMetaIdle: "读取当前标签页",
+    openGuide: "打开使用指引",
+    newSession: "新会话",
+    newSessionTitle: "清空当前会话",
+    bridgeDisconnected: "未连接 Hermes Bridge",
+    bridgeIntro: "安装本地 bridge 后，扩展会连接你自己的 Hermes 配置来调用模型。",
+    copyCommand: "复制命令",
+    copied: "已复制",
+    recheck: "重新检测",
+    bridgeNote: "运行脚本前可先打开 GitHub 仓库查看源码。页面内容会发送给本机 Hermes，再由你的 Hermes 配置调用模型。",
+    questionPlaceholder: "基于当前页面提问，或直接让 Hermes 总结。",
+    summarize: "总结页面",
+    summarizePrompt: "请总结当前页面，并列出我最可能需要关注的点。",
+    defaultPrompt: "请总结当前页面。",
+    send: "发送",
+    processing: "处理中",
+    history: "会话历史",
+    historySessions: "历史会话",
+    noHistory: "暂无历史会话",
+    unnamedSession: "未命名会话",
+    restoredSession: "已恢复会话",
+    restore: "恢复",
+    delete: "删除",
+    advanced: "高级设置",
+    model: "模型",
+    hermesDefault: "Hermes 默认",
+    optional: "可选",
+    internalPage: "当前页面可能是浏览器内部页，扩展无法读取正文，只能使用标题和 URL。",
+    internalPageMeta: "浏览器内部页面",
+    noActiveTab: "没有找到当前标签页",
+    readFailed: "读取页面失败",
+    pageContextFailed: "页面上下文读取失败",
+    requestFailed: "请求失败",
+    waiting: "正在等待 Hermes...",
+    emptyResponse: "(空响应)",
+    thinkingLabel: "分析思路",
+    currentLanguageName: "中文"
+  }
+};
 
 const els = {
   messages: document.querySelector("#messages"),
@@ -22,7 +102,8 @@ const els = {
   deleteSession: document.querySelector("#deleteSession"),
   modelSelect: document.querySelector("#modelSelect"),
   bridgeUrl: document.querySelector("#bridgeUrl"),
-  bridgeToken: document.querySelector("#bridgeToken")
+  bridgeToken: document.querySelector("#bridgeToken"),
+  languageTabs: document.querySelectorAll(".languageTab")
 };
 
 let pageContext = null;
@@ -30,6 +111,7 @@ let busy = false;
 let conversationHistory = [];
 let currentSessionId = createSessionId();
 let savedSessions = [];
+let currentLanguage = "en";
 
 init();
 
@@ -37,23 +119,29 @@ async function init() {
   const saved = await chrome.storage.sync.get({
     bridgeUrl: DEFAULT_BRIDGE_URL,
     bridgeToken: "",
-    modelSelect: "deepseek|deepseek-v4-flash"
+    modelSelect: "deepseek|deepseek-v4-flash",
+    language: "en"
   });
+  currentLanguage = I18N[saved.language] ? saved.language : "en";
   els.bridgeUrl.value = saved.bridgeUrl;
   els.bridgeToken.value = saved.bridgeToken;
   els.modelSelect.value = saved.modelSelect;
   els.installCommand.textContent = DEFAULT_INSTALL_COMMAND;
+  applyLanguage();
 
   els.bridgeUrl.addEventListener("change", saveSettings);
   els.bridgeToken.addEventListener("change", saveSettings);
   els.modelSelect.addEventListener("change", saveSettings);
+  els.languageTabs.forEach((tab) => {
+    tab.addEventListener("click", () => setLanguage(tab.dataset.language));
+  });
   els.newSession.addEventListener("click", newSession);
   els.helpButton.addEventListener("click", openHelp);
   els.copyInstallCommand.addEventListener("click", copyInstallCommand);
   els.checkBridge.addEventListener("click", checkBridge);
   els.restoreSession.addEventListener("click", restoreSelectedSession);
   els.deleteSession.addEventListener("click", deleteSelectedSession);
-  els.summarize.addEventListener("click", () => ask("请总结当前页面，并列出我最可能需要关注的点。"));
+  els.summarize.addEventListener("click", () => ask(t("summarizePrompt")));
   els.askForm.addEventListener("submit", (event) => {
     event.preventDefault();
     ask(els.question.value.trim());
@@ -65,6 +153,46 @@ async function init() {
   await checkBridge();
 }
 
+function t(key) {
+  return I18N[currentLanguage]?.[key] || I18N.en[key] || key;
+}
+
+async function setLanguage(language) {
+  if (!I18N[language] || currentLanguage === language) return;
+  currentLanguage = language;
+  applyLanguage();
+  await saveSettings();
+}
+
+function applyLanguage() {
+  document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+    const value = t(node.dataset.i18nTitle);
+    node.title = value;
+    node.setAttribute("aria-label", value);
+  });
+  els.languageTabs.forEach((tab) => {
+    const active = tab.dataset.language === currentLanguage;
+    tab.classList.toggle("isActive", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  els.send.textContent = busy ? t("processing") : t("send");
+  renderSessionOptions();
+  updateAssistantLabels();
+}
+
+function updateAssistantLabels() {
+  document.querySelectorAll(".thinkingBubble .bubbleLabel").forEach((node) => {
+    node.textContent = t("thinkingLabel");
+  });
+}
+
 async function openHelp() {
   await chrome.tabs.create({ url: chrome.runtime.getURL("help.html") });
 }
@@ -73,7 +201,8 @@ async function saveSettings() {
   await chrome.storage.sync.set({
     bridgeUrl: normalizeBridgeUrl(els.bridgeUrl.value),
     bridgeToken: els.bridgeToken.value,
-    modelSelect: els.modelSelect.value
+    modelSelect: els.modelSelect.value,
+    language: currentLanguage
   });
 }
 
@@ -106,7 +235,7 @@ async function bridgeHealthCheck() {
 async function copyInstallCommand() {
   await navigator.clipboard.writeText(DEFAULT_INSTALL_COMMAND);
   const oldText = els.copyInstallCommand.textContent;
-  els.copyInstallCommand.textContent = "已复制";
+  els.copyInstallCommand.textContent = t("copied");
   setTimeout(() => {
     els.copyInstallCommand.textContent = oldText;
   }, 1400);
@@ -120,7 +249,7 @@ async function getActiveTab() {
 async function refreshPageContext() {
   try {
     const tab = await getActiveTab();
-    if (!tab?.id) throw new Error("没有找到当前标签页");
+    if (!tab?.id) throw new Error(t("noActiveTab"));
 
     if (!/^https?:|^file:/.test(tab.url || "")) {
       pageContext = {
@@ -132,8 +261,8 @@ async function refreshPageContext() {
         forms: [],
         resources: []
       };
-      els.pageMeta.textContent = tab.title || tab.url || "浏览器内部页面";
-      addMessage("system", "当前页面可能是浏览器内部页，扩展无法读取正文，只能使用标题和 URL。");
+      els.pageMeta.textContent = tab.title || tab.url || t("internalPageMeta");
+      addMessage("system", t("internalPage"));
       return;
     }
 
@@ -145,17 +274,17 @@ async function refreshPageContext() {
       response = await chrome.tabs.sendMessage(tab.id, { type: "COLLECT_PAGE_CONTEXT" });
     }
 
-    if (!response?.ok) throw new Error(response?.error || "读取页面失败");
+    if (!response?.ok) throw new Error(response?.error || t("readFailed"));
     pageContext = response.page;
     els.pageMeta.textContent = `${pageContext.title || "Untitled"} · ${new URL(pageContext.url).hostname}`;
   } catch (error) {
-    addMessage("system", `页面上下文读取失败：${error.message || error}`);
+    addMessage("system", `${t("pageContextFailed")}: ${error.message || error}`);
   }
 }
 
 async function ask(question) {
   if (busy) return;
-  const finalQuestion = question || "请总结当前页面。";
+  const finalQuestion = question || t("defaultPrompt");
   els.question.value = "";
   setBusy(true);
   addMessage("user", finalQuestion);
@@ -177,7 +306,8 @@ async function ask(question) {
         page: pageContext,
         provider,
         model,
-        history: conversationHistory.slice(-8)
+        history: conversationHistory.slice(-8),
+        language: currentLanguage
       })
     });
     if (!res.ok) {
@@ -191,7 +321,7 @@ async function ask(question) {
   } catch (error) {
     assistantMessage.remove();
     await checkBridge();
-    addMessage("system", `请求失败：${error.message || error}`);
+    addMessage("system", `${t("requestFailed")}: ${error.message || error}`);
   } finally {
     setBusy(false);
   }
@@ -263,7 +393,7 @@ async function persistCurrentSession() {
 }
 
 function buildSessionTitle() {
-  const firstUser = conversationHistory.find((message) => message.role === "user")?.content || "新会话";
+  const firstUser = conversationHistory.find((message) => message.role === "user")?.content || t("newSession");
   return firstUser.replace(/\s+/g, " ").trim().slice(0, 42);
 }
 
@@ -273,7 +403,7 @@ function renderSessionOptions() {
   if (!savedSessions.length) {
     const option = document.createElement("option");
     option.value = "";
-    option.textContent = "暂无历史会话";
+    option.textContent = t("noHistory");
     els.sessionSelect.appendChild(option);
     els.restoreSession.disabled = true;
     els.deleteSession.disabled = true;
@@ -283,7 +413,7 @@ function renderSessionOptions() {
   for (const session of savedSessions) {
     const option = document.createElement("option");
     option.value = session.id;
-    option.textContent = `${formatTime(session.updatedAt)} · ${session.title || session.pageTitle || "未命名会话"}`;
+    option.textContent = `${formatTime(session.updatedAt)} · ${session.title || session.pageTitle || t("unnamedSession")}`;
     els.sessionSelect.appendChild(option);
   }
   els.restoreSession.disabled = busy;
@@ -322,7 +452,7 @@ async function restoreSelectedSession() {
   }
   els.messages.scrollTop = els.messages.scrollHeight;
   if (session.pageTitle || session.pageUrl) {
-    els.pageMeta.textContent = `${session.pageTitle || "已恢复会话"}${session.pageUrl ? ` · ${safeHostname(session.pageUrl)}` : ""}`;
+    els.pageMeta.textContent = `${session.pageTitle || t("restoredSession")}${session.pageUrl ? ` · ${safeHostname(session.pageUrl)}` : ""}`;
   }
 }
 
@@ -362,7 +492,7 @@ function addMessage(role, text) {
 
 function updateAssistantMessage(item, text) {
   item.dataset.raw = text || "";
-  item.innerHTML = text ? renderAssistantMarkdown(text) : '<div class="answerBubble"><p class="streamingHint">正在等待 Hermes...</p></div>';
+  item.innerHTML = text ? renderAssistantMarkdown(text) : `<div class="answerBubble"><p class="streamingHint">${escapeHtml(t("waiting"))}</p></div>`;
   els.messages.scrollTop = els.messages.scrollHeight;
 }
 
@@ -393,7 +523,7 @@ async function readAnswerStream(res, item) {
       } else if (event.type === "error") {
         throw new Error(event.error || "Bridge stream error");
       } else if (event.type === "done") {
-        if (!answer.trim()) updateAssistantMessage(item, "(空响应)");
+        if (!answer.trim()) updateAssistantMessage(item, t("emptyResponse"));
         return answer;
       }
     }
@@ -406,7 +536,7 @@ async function readAnswerStream(res, item) {
       updateAssistantMessage(item, answer);
     }
   }
-  if (!answer.trim()) updateAssistantMessage(item, "(空响应)");
+  if (!answer.trim()) updateAssistantMessage(item, t("emptyResponse"));
   return answer;
 }
 
@@ -418,7 +548,7 @@ function setBusy(value) {
   renderSessionOptions();
   els.modelSelect.disabled = value;
   els.checkBridge.disabled = value;
-  els.send.textContent = value ? "处理中" : "发送";
+  els.send.textContent = value ? t("processing") : t("send");
 }
 
 function escapeHtml(value) {
@@ -586,7 +716,7 @@ function renderAssistantMarkdown(markdown) {
   const extracted = extractThinkBlocks(normalized);
   const parts = [];
   if (extracted.thinking.length) {
-    parts.push(`<div class="thinkingBubble"><div class="bubbleLabel">分析思路</div>${renderMarkdown(extracted.thinking.join("\n\n"))}</div>`);
+    parts.push(`<div class="thinkingBubble"><div class="bubbleLabel">${escapeHtml(t("thinkingLabel"))}</div>${renderMarkdown(extracted.thinking.join("\n\n"))}</div>`);
   }
   const answerHtml = renderMarkdown(extracted.answer.trim() || normalized);
   parts.push(`<div class="answerBubble">${answerHtml}</div>`);
@@ -604,14 +734,14 @@ function extractThinkBlocks(markdown) {
 
 function normalizeVisibleThinking(markdown) {
   if (/<think>/i.test(markdown)) return markdown;
-  const match = /(^|\n)\s*(分析思路|思考过程|思路摘要)\s*[:：]\s*/.exec(markdown);
+  const match = /(^|\n)\s*(分析思路|思考过程|思路摘要|analysis|reasoning summary|reasoning)\s*[:：]\s*/i.exec(markdown);
   if (!match) return markdown;
 
   const start = (match.index || 0) + match[1].length;
   const labelEnd = start + match[0].slice(match[1].length).length;
   const before = markdown.slice(0, start);
   const rest = markdown.slice(labelEnd);
-  const answerMatch = /\n\s*(正式答案|答案|结论)\s*[:：]\s*/.exec(rest);
+  const answerMatch = /\n\s*(正式答案|答案|结论|final answer|answer|conclusion)\s*[:：]\s*/i.exec(rest);
 
   if (!answerMatch) {
     return `${before}<think>${rest.trim()}</think>`;
