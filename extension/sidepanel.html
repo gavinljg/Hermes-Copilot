@@ -32,49 +32,51 @@
 
       <section id="messages" class="messages" aria-live="polite"></section>
 
-      <form id="askForm" class="composer">
-        <textarea id="question" rows="4" placeholder="基于当前页面提问，或直接让 Hermes 总结。"></textarea>
-        <div class="composerRow">
-          <button type="button" id="summarize">总结页面</button>
-          <button type="submit" id="send">发送</button>
-        </div>
-      </form>
-
-      <details class="settings historyPanel">
-        <summary>会话历史</summary>
-        <div class="settingsBody">
-          <label>
-            历史会话
-            <select id="sessionSelect"></select>
-          </label>
-          <div class="historyActions">
-            <button type="button" id="restoreSession">恢复</button>
-            <button type="button" id="deleteSession">删除</button>
+      <section class="bottomPanel">
+        <form id="askForm" class="composer">
+          <textarea id="question" rows="4" placeholder="基于当前页面提问，或直接让 Hermes 总结。"></textarea>
+          <div class="composerRow">
+            <button type="button" id="summarize">总结页面</button>
+            <button type="submit" id="send">发送</button>
           </div>
-        </div>
-      </details>
+        </form>
 
-      <details class="settings">
-        <summary>高级设置</summary>
-        <div class="settingsBody">
-          <label>
-            模型
-            <select id="modelSelect">
-              <option value="deepseek|deepseek-v4-flash">DeepSeek V4 Flash</option>
-              <option value="deepseek|deepseek-v4-pro">DeepSeek V4 Pro</option>
-              <option value="|">Hermes 默认</option>
-            </select>
-          </label>
-          <label>
-            Bridge
-            <input id="bridgeUrl" type="url" spellcheck="false" />
-          </label>
-          <label>
-            Token
-            <input id="bridgeToken" type="password" spellcheck="false" placeholder="可选" />
-          </label>
-        </div>
-      </details>
+        <details class="settings historyPanel">
+          <summary>会话历史</summary>
+          <div class="settingsBody">
+            <label>
+              历史会话
+              <select id="sessionSelect"></select>
+            </label>
+            <div class="historyActions">
+              <button type="button" id="restoreSession">恢复</button>
+              <button type="button" id="deleteSession">删除</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="settings">
+          <summary>高级设置</summary>
+          <div class="settingsBody">
+            <label>
+              模型
+              <select id="modelSelect">
+                <option value="deepseek|deepseek-v4-flash">DeepSeek V4 Flash</option>
+                <option value="deepseek|deepseek-v4-pro">DeepSeek V4 Pro</option>
+                <option value="|">Hermes 默认</option>
+              </select>
+            </label>
+            <label>
+              Bridge
+              <input id="bridgeUrl" type="url" spellcheck="false" />
+            </label>
+            <label>
+              Token
+              <input id="bridgeToken" type="password" spellcheck="false" placeholder="可选" />
+            </label>
+          </div>
+        </details>
+      </section>
     </main>
     <script src="sidepanel.js"></script>
   </body>

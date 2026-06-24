@@ -314,6 +314,7 @@ async function restoreSelectedSession() {
   for (const message of conversationHistory) {
     addMessage(message.role === "assistant" ? "assistant" : "user", message.content || "");
   }
+  els.messages.scrollTop = els.messages.scrollHeight;
   if (session.pageTitle || session.pageUrl) {
     els.pageMeta.textContent = `${session.pageTitle || "已恢复会话"}${session.pageUrl ? ` · ${safeHostname(session.pageUrl)}` : ""}`;
   }
